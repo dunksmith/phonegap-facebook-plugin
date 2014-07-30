@@ -486,7 +486,7 @@ public class ConnectPlugin extends CordovaPlugin {
 			public void onCompleted(Response response) {
 				if (graphContext != null) {
 					if (response.getError() != null) {
-						graphContext.error(response.getError().getErrorMessage());
+						graphContext.error(getErrorJson(response.getError()));
 					} else {
 						GraphObject graphObject = response.getGraphObject();
 						graphContext.success(graphObject.getInnerJSONObject());
@@ -550,6 +550,28 @@ public class ConnectPlugin extends CordovaPlugin {
 	private boolean isPublishPermission(String permission) {
 		return permission != null && (permission.startsWith(PUBLISH_PERMISSION_PREFIX) || permission.startsWith(MANAGE_PERMISSION_PREFIX) || OTHER_PUBLISH_PERMISSIONS.contains(permission));
 	}
+	
+	/**
+	 * Create a JSON representation of a FacebookRequestError object that that matches the one for the Javascript SDK
+	 * @return JSONObject - the error response object
+	 */
+	private JSONObject getErrorJson(FacebookRequestError error) {
+    	String response;
+		response = "{"+
+			"\"error\": {"+
+			  "\"type\": \""+error.getErrorType()+"\","+
+			  "\"message\": \""+error.getErrorMessage()+"\","+
+			  "\"code\": "+error.getErrorCode()+
+			"}"+
+          "}";
+    	
+        try {
+            return new JSONObject(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject();
+    }
 	
 	/**
 	 * Create a Facebook Response object that matches the one for the Javascript SDK
